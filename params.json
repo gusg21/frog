@@ -1,6 +1,0 @@
-{
-  "name": "Frog",
-  "tagline": "",
-  "body": "# frog\r\n\r\nA game framework made in Java! Yay...\r\n\r\nIt's honestly pretty bad right now with a ton of optimization opportunities I don't have the experience to notice. It doesn't even have Image support.\r\n",
-  "note": "Don't delete this file! It's used internally to help with page regeneration."
-}
