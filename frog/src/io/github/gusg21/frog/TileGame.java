@@ -69,7 +69,9 @@ public class TileGame implements Runnable, KeyListener, MouseListener {
 		long currentUpdateTime = System.nanoTime();
 		long lastUpdateTime;
 		long deltaLoop;
-
+		
+		init();
+		
 		while (running) {
 			beginLoopTime = System.nanoTime();
 
@@ -94,6 +96,12 @@ public class TileGame implements Runnable, KeyListener, MouseListener {
 		}
 	}
 	
+	private void init() {
+		if (state == States.PLAYING) {
+			Playing.init();
+		}
+	}
+
 	public static void setState(States newState) {
 		state = newState;
 	}
@@ -106,18 +114,12 @@ public class TileGame implements Runnable, KeyListener, MouseListener {
 		bufferStrategy.show();
 	}
 
-	/**
-	 * Rewrite this method for your game
-	 */
 	protected void update(int deltaTime) {
 		if (state == States.PLAYING) {
 			Playing.update(deltaTime);
 		}
 	}
 
-	/**
-	 * Rewrite this method for your game
-	 */
 	protected void render(Graphics2D g) {
 		if (state == States.PLAYING) {
 			Playing.render(g);

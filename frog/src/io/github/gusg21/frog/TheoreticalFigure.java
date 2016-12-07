@@ -1,23 +1,33 @@
 package io.github.gusg21.frog;
 
+import java.awt.AlphaComposite;
 import java.awt.Color;
+import java.awt.Composite;
 import java.awt.Graphics2D;
+import java.awt.Image;
+import java.awt.geom.Point2D;
 import java.util.Random;
 
 public class TheoreticalFigure {
-
+	
+	public enum ColliderTypes {
+		RECTANGLE, CIRCLE, NONE
+	}
+	
 	public double x = 0, y = 0; // Position
 	private double px, py;
 	public int width = 20, height = 20; // Dimensions
+	public double radius;
 	private int pwidth, pheight;
 	private int alpha = 255;
-	public boolean destroyed = false;
+	boolean destroyed = false;
+	ColliderTypes type = null;
 
 	private static Random r = new Random();
 
 	/**
 	 * Creates a new rectangle object in the game, with width, height, x and y.
-	 * Has easy rendering capabilites (render()) and collision detection
+	 * Has easy rendering capabilities (render()) and collision detection
 	 * (isColliding()).
 	 * 
 	 * @param nx
@@ -25,14 +35,16 @@ public class TheoreticalFigure {
 	 * @param ny
 	 *            Y position of object by default.
 	 */
-	public TheoreticalFigure(double nx, double ny) {
+	public TheoreticalFigure(double nx, double ny, ColliderTypes type) {
 		x = nx;
 		y = ny;
+		this.type = type;
+		radius = width / 2;
 	}
 
 	/**
 	 * Creates a new rectangle object in the game, with width, height, x and y.
-	 * Has easy rendering capabilites (render()) and collision detection
+	 * Has easy rendering capabilities (render()) and collision detection
 	 * (isColliding()).
 	 * 
 	 * @param nx
@@ -44,11 +56,13 @@ public class TheoreticalFigure {
 	 * @param nheight
 	 *            Height of the object by default.
 	 */
-	public TheoreticalFigure(double nx, double ny, int nwidth, int nheight) {
+	public TheoreticalFigure(double nx, double ny, int nwidth, int nheight, ColliderTypes type) {
 		x = nx;
 		y = ny;
 		width = nwidth;
 		height = nheight;
+		this.type = type;
+		radius = width / 2;
 	}
 
 	/**
@@ -57,7 +71,7 @@ public class TheoreticalFigure {
 	 * @return Collider
 	 */
 	public Collider getCollider() {
-		return new Collider((int) x, (int) y, width, height);
+		return new Collider((int) x, (int) y, width, height, type);
 	}
 
 	/**
@@ -115,10 +129,6 @@ public class TheoreticalFigure {
 	 */
 	public void destroy() {
 		if (!destroyed) {
-			pwidth = width;
-			pheight = height;
-			width = 0;
-			height = 0;
 			px = x;
 			py = y;
 			x = -(r.nextInt(30000));
@@ -132,8 +142,6 @@ public class TheoreticalFigure {
 	 */
 	public void revive() {
 		if (destroyed) {
-			width = pwidth;
-			height = pheight;
 			x = px;
 			y = py;
 			destroyed = false;
@@ -142,19 +150,34 @@ public class TheoreticalFigure {
 
 	/**
 	 * Checks if the collider of the current object is overlapping with the
-	 * collider of a seperate object
+	 * collider of a separate object
 	 * 
 	 * @param other
 	 *            The Collider of the other object (otherObject.getCollider())
 	 * @return If you're colliding, true, else false
 	 */
 	public boolean isColliding(Collider other) {
-		return x < other.x + other.width && x + width > other.x
-				&& y < other.y + other.height && y + height > other.y;
+		switch (type) {
+		case RECTANGLE:
+			if (other.type == ColliderTypes.RECTANGLE) { // Only current support is for Rectangle-on-Rectangle collisions
+				return x < other.x + other.width && x + width > other.x
+						&& y < other.y + other.height && y + height > other.y;
+			}
+			if (other.type == ColliderTypes.CIRCLE) {
+				return false; // Unimplemented
+			}
+		case CIRCLE:
+			return false; // PLEASE SOMEONE IMPLEMENT
+		case NONE:
+			return false;
+		default:
+			System.out.println("Uh-oh...");
+			return false;
+		}
 	}
 
 	/**
-	 * Renders the Theoretical as a rectangle
+	 * Renders the Theoretical as a colored rectangle
 	 * 
 	 * @param g
 	 *            The Graphics2D object you're using
@@ -165,6 +188,21 @@ public class TheoreticalFigure {
 		g.setColor(new Color(color.getRed(), color.getGreen(), color.getBlue(),
 				alpha));
 		g.fillRect((int) x, (int) y, width, height);
+	}
+	
+	/**
+	 * Renders the Theoretical as a provided image, resized to the width and height of Theoretical
+	 * 
+	 * @param g The Graphics2D object you're using
+	 * @param image The Image to render
+	 */
+	public void render(Graphics2D g, Image image) {
+		image = image.getScaledInstance(width, height, Image.SCALE_DEFAULT);
+		int pAlpha = alpha;
+		AlphaComposite alcom = AlphaComposite.getInstance(
+                AlphaComposite.SRC_OVER, (float) alpha / 255);
+        g.setComposite(alcom);
+		g.drawImage(image,(int) x,(int) y, null);
 	}
 
 	/**
