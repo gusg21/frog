@@ -2,8 +2,10 @@ package io.github.gusg21.frog;
 
 import java.awt.AlphaComposite;
 import java.awt.Color;
+import java.awt.Composite;
 import java.awt.Graphics2D;
 import java.awt.Image;
+import java.awt.geom.Point2D;
 import java.util.Random;
 
 public class TheoreticalFigure {
@@ -16,6 +18,7 @@ public class TheoreticalFigure {
 	private double px, py;
 	public int width = 20, height = 20; // Dimensions
 	public double radius;
+	private int pwidth, pheight;
 	private int alpha = 255;
 	boolean destroyed = false;
 	ColliderTypes type = null;
@@ -195,6 +198,7 @@ public class TheoreticalFigure {
 	 */
 	public void render(Graphics2D g, Image image) {
 		image = image.getScaledInstance(width, height, Image.SCALE_DEFAULT);
+		int pAlpha = alpha;
 		AlphaComposite alcom = AlphaComposite.getInstance(
                 AlphaComposite.SRC_OVER, (float) alpha / 255);
         g.setComposite(alcom);
