@@ -7,17 +7,17 @@ import java.awt.Image;
 import java.util.Random;
 
 public class TheoreticalFigure {
-	
+
 	public enum ColliderTypes {
 		RECTANGLE, CIRCLE, NONE
 	}
-	
+
 	public double x = 0, y = 0; // Position
 	private double px, py;
 	public int width = 20, height = 20; // Dimensions
 	public double radius;
 	private int alpha = 255;
-	boolean destroyed = false;
+	boolean destroyed = false, scale = true;
 	ColliderTypes type = null;
 
 	private static Random r = new Random();
@@ -31,6 +31,8 @@ public class TheoreticalFigure {
 	 *            X position of object by default.
 	 * @param ny
 	 *            Y position of object by default.
+	 * @param type
+	 *            The Collider Type, from ColliderTypes Enumerator
 	 */
 	public TheoreticalFigure(double nx, double ny, ColliderTypes type) {
 		x = nx;
@@ -52,8 +54,11 @@ public class TheoreticalFigure {
 	 *            Width of the object by default.
 	 * @param nheight
 	 *            Height of the object by default.
+	 * @param type
+	 *            The Collider Type, from ColliderTypes Enumerator
 	 */
-	public TheoreticalFigure(double nx, double ny, int nwidth, int nheight, ColliderTypes type) {
+	public TheoreticalFigure(double nx, double ny, int nwidth, int nheight,
+			ColliderTypes type) {
 		x = nx;
 		y = ny;
 		width = nwidth;
@@ -156,7 +161,10 @@ public class TheoreticalFigure {
 	public boolean isColliding(Collider other) {
 		switch (type) {
 		case RECTANGLE:
-			if (other.type == ColliderTypes.RECTANGLE) { // Only current support is for Rectangle-on-Rectangle collisions
+			if (other.type == ColliderTypes.RECTANGLE) { // Only current support
+															// is for
+															// Rectangle-on-Rectangle
+															// collisions
 				return x < other.x + other.width && x + width > other.x
 						&& y < other.y + other.height && y + height > other.y;
 			}
@@ -186,25 +194,46 @@ public class TheoreticalFigure {
 				alpha));
 		g.fillRect((int) x, (int) y, width, height);
 	}
-	
+
 	/**
-	 * Renders the Theoretical as a provided image, resized to the width and height of Theoretical
+	 * Whether the image should be scaled to its width and height on render()
 	 * 
-	 * @param g The Graphics2D object you're using
-	 * @param image The Image to render
+	 * @param scale
+	 *            Whether the image should be scaled
+	 */
+	public void scaleToWidthHeight(boolean scale) {
+		this.scale = scale;
+	}
+
+	/**
+	 * Renders the Theoretical as a provided image, resized to the width and
+	 * height of Theoretical
+	 * 
+	 * @param g
+	 *            The Graphics2D object you're using
+	 * @param image
+	 *            The Image to render
 	 */
 	public void render(Graphics2D g, Image image) {
-		image = image.getScaledInstance(width, height, Image.SCALE_DEFAULT);
-		AlphaComposite alcom = AlphaComposite.getInstance(
-                AlphaComposite.SRC_OVER, (float) alpha / 255);
-        g.setComposite(alcom);
-		g.drawImage(image,(int) x,(int) y, null);
+		if (scale) {
+			image = image.getScaledInstance(width, height, Image.SCALE_DEFAULT);
+			AlphaComposite alcom = AlphaComposite.getInstance(
+					AlphaComposite.SRC_OVER, (float) alpha / 255);
+			g.setComposite(alcom);
+			g.drawImage(image, (int) x, (int) y, null);
+		} else {
+			AlphaComposite alcom = AlphaComposite.getInstance(
+					AlphaComposite.SRC_OVER, (float) alpha / 255);
+			g.setComposite(alcom);
+			g.drawImage(image, (int) x, (int) y, null);
+		}
 	}
 
 	/**
 	 * Sets the rendering alpha. (0-255)
 	 * 
 	 * @param newAlpha
+	 *            New alpha value
 	 */
 	public void editRenderAlpha(int newAlpha) {
 		if (newAlpha > 255) {

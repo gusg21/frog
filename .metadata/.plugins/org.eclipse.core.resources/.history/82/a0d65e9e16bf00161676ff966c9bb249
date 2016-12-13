@@ -1,0 +1,188 @@
+package io.github.gusg21.frog.states;
+
+import io.github.gusg21.frog.AudioManager;
+import io.github.gusg21.frog.TheoreticalFigure;
+import io.github.gusg21.frog.TileGame;
+
+import java.awt.Color;
+import java.awt.Font;
+import java.awt.Graphics2D;
+import java.awt.Image;
+import java.awt.event.KeyEvent;
+import java.awt.event.MouseEvent;
+import java.io.IOException;
+import java.net.URISyntaxException;
+import java.util.Random;
+
+import javax.imageio.ImageIO;
+import javax.sound.sampled.LineUnavailableException;
+import javax.sound.sampled.UnsupportedAudioFileException;
+
+public class Playing {
+
+	/*
+	 * Player Figure
+	 */
+	static TheoreticalFigure player = new TheoreticalFigure(20, 20,
+			TheoreticalFigure.ColliderTypes.RECTANGLE);
+
+	/*
+	 * Wall Figures
+	 */
+	static TheoreticalFigure wall1 = new TheoreticalFigure(80, 80, 70, 260,
+			TheoreticalFigure.ColliderTypes.RECTANGLE);
+	static TheoreticalFigure wall2 = new TheoreticalFigure(280, 80, 70, 260,
+			TheoreticalFigure.ColliderTypes.RECTANGLE);
+
+	/*
+	 * Item / Gameplay Figures
+	 */
+	static TheoreticalFigure coin1 = new TheoreticalFigure(180, 180, 20, 20,
+			TheoreticalFigure.ColliderTypes.RECTANGLE);
+
+	static int speed = 5;
+	static int score = 0;
+	static int Calpha = 255;
+	static double prevx, prevy;
+
+	static Image playerImage;
+	static Image coinImage;
+	
+	static boolean mPressed = false;
+	static private Random r = new Random();
+
+	public static void render(Graphics2D g) {
+		/*
+		 * Figure Rendering
+		 */
+		player.render(g, playerImage);
+
+		wall1.render(g, Color.BLUE);
+		wall2.render(g, Color.BLUE);
+
+		coin1.render(g, coinImage);
+
+		/*
+		 * Extra Rendering (GUI, etc.)
+		 */
+		TileGame.canvas.setBackground(new Color(34, 139, 34));
+		g.setColor(Color.WHITE);
+		g.setFont(new Font("Verdana", Font.PLAIN, 36));
+		
+		g.drawString(String.valueOf(score), 10, 40);
+	}
+
+	public static void update(int deltaTime) throws UnsupportedAudioFileException {
+
+		/*
+		 * COLLISIONS
+		 */
+		boolean colliding = ( // Wall Collision Register
+		player.isColliding(wall1.getCollider()) || player.isColliding(wall2
+				.getCollider()));
+
+		/*
+		 * Wall
+		 */
+		if (colliding) {
+			revertXY(player);
+		} else {
+			setPrevPos();
+		}
+
+		/*
+		 * Coin
+		 */
+		if (player.isColliding(coin1.getCollider())) {
+			AudioManager.playSound("assets/jump.wav");
+			score += 50;
+			coin1.destroy();
+		}
+	}
+
+	private static void revertXY(TheoreticalFigure fig) {
+		fig.x = prevx;
+		fig.y = prevy;
+	}
+
+	private static void setPrevPos() {
+		prevx = player.x;
+		prevy = player.y;
+	}
+
+	public static void keyPressed(KeyEvent e) {
+		switch (e.getKeyCode()) {
+		case KeyEvent.VK_UP:
+			if (player.y > 0) {
+				player.y -= speed;
+			}
+			break;
+		case KeyEvent.VK_DOWN:
+			if (player.y < TileGame.HEIGHT) {
+				player.y += speed;
+			}
+			break;
+		case KeyEvent.VK_LEFT:
+			if (player.x > 0) {
+				player.x -= speed;
+			}
+			break;
+		case KeyEvent.VK_RIGHT:
+			if (player.x < TileGame.WIDTH) {
+				player.x += speed;
+			}
+			break;
+		case KeyEvent.VK_C:
+			coin1.revive();
+			break;
+		case KeyEvent.VK_R:
+			restart();
+			break;
+		}
+
+	}
+
+	private static void restart() {
+		wall1.x = r.nextInt(TileGame.canvas.getWidth());
+		wall1.y = r.nextInt(TileGame.canvas.getHeight());
+		wall2.x = r.nextInt(TileGame.canvas.getWidth());
+		wall2.y = r.nextInt(TileGame.canvas.getHeight());
+		coin1.x = r.nextInt(TileGame.canvas.getWidth());
+		coin1.y = r.nextInt(TileGame.canvas.getHeight());
+		coin1.revive();
+		coin1.editRenderAlpha(255);
+		player.x = 20;
+		player.y = 20;
+	}
+
+	public static void keyReleased(KeyEvent e) {
+		switch (e.getKeyCode()) {
+		}
+	}
+
+	public static void mouseReleased(MouseEvent e) {
+		mPressed = false;
+	}
+
+	public static void mousePressed(MouseEvent e) {
+		mPressed = true;
+	}
+
+	public static void init() {
+		try {
+			playerImage = ImageIO.read(TileGame.class
+					.getResourceAsStream("assets/player.png"));
+		} catch (IOException e) {
+			System.out.println("I no findy find player image!");
+			e.printStackTrace();
+		}
+		try {
+			coinImage = ImageIO.read(TileGame.class
+					.getResourceAsStream("assets/coin.png"));
+		} catch (IOException e) {
+			System.out.println("I no findy find coin image!");
+			e.printStackTrace();
+		}
+	}
+
+}

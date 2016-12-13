@@ -1,6 +1,5 @@
 package io.github.gusg21.frog.states;
 
-import io.github.gusg21.frog.AudioManager;
 import io.github.gusg21.frog.TheoreticalFigure;
 import io.github.gusg21.frog.TileGame;
 
@@ -10,13 +9,10 @@ import java.awt.Graphics2D;
 import java.awt.Image;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
-import java.io.File;
 import java.io.IOException;
 import java.util.Random;
 
 import javax.imageio.ImageIO;
-import javax.sound.sampled.LineUnavailableException;
-import javax.sound.sampled.UnsupportedAudioFileException;
 
 public class Playing {
 
@@ -94,21 +90,6 @@ public class Playing {
 		 * Coin
 		 */
 		if (player.isColliding(coin1.getCollider())) {
-			try {
-				AudioManager.playClip(new File("assets/jump.wav"));
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			} catch (UnsupportedAudioFileException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			} catch (LineUnavailableException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
 			score += 50;
 			coin1.destroy();
 		}
